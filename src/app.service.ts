@@ -12,6 +12,7 @@ import {
   SubdivisionsRecord,
 } from '@maxmind/geoip2-node';
 import * as path from 'path';
+import * as fs from 'fs';
 import ReaderModel from '@maxmind/geoip2-node/dist/src/readerModel';
 
 @Injectable()
@@ -24,12 +25,22 @@ export class AppService {
   }
 
   private async initializeReaders() {
-    // TODO: Download the GeoIP2 Lite City and ASN DBs and save them in a folder called data
-    const asnFilePath = path.join(process.cwd(), './data/GeoLite2-ASN.mmdb');
-    const cityFilePath = path.join(process.cwd(), './data/GeoLite2-City.mmdb');
+    const now = Date.now();
 
-    this.asnReader = await Reader.open(asnFilePath);
-    this.cityReader = await Reader.open(cityFilePath);
+    const geoIpDbsPath = './data';
+
+    const asnFilePath = path.join(process.cwd(), geoIpDbsPath, 'GeoLite2-ASN.mmdb');
+    const cityFilePath = path.join(process.cwd(), geoIpDbsPath, 'GeoLite2-City.mmdb');
+
+    const asnDbBuffer = fs.readFileSync(asnFilePath);
+    const cityDbBuffer = fs.readFileSync(cityFilePath);
+
+    this.asnReader = Reader.openBuffer(asnDbBuffer);
+    this.cityReader = Reader.openBuffer(cityDbBuffer);
+
+    const timeTaken = Date.now() - now;
+
+    Logger.log(`[initializeReaders]: GeoIp databases initialised after...${timeTaken}ms`)
   }
 
   private async fetchIp(req: any): Promise<string> {
