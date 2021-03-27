@@ -10,7 +10,7 @@ export class AppController {
     return this.appService.getFilteredIpDetails(req);
   }
 
-  @Get('all')
+  @Get('data/:id/all')
   getAllGeoIpData(@Req() req: Express.Request): Promise<string> {
     return this.appService.getAllIpDetails(req);
   }
